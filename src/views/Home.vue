@@ -1,23 +1,34 @@
 <template>
-  <div class="common-layout" style="height:auto">
+  <div class="home">
     <el-container>
-      <el-header>Header</el-header>
-      <el-main>
-          <HomeMain />
-      </el-main>
+      <el-header>
+        <Head />
+      </el-header>
+      <el-row>
+        <el-col :span="18" :offset="3">
+          <el-main>
+            <HomeMain />
+          </el-main>
+        </el-col>
+      </el-row>
       <el-footer>Footer</el-footer>
     </el-container>
   </div>
 </template>
 
-<script>
+<script setup>
 // @ is an alias to /src
-import HomeMain from '@/components/main/HomeMain.vue'
-
-export default {
-  name: 'Home',
-  components: {
-    HomeMain
-  }
-}
+import HomeMain from "@/components/main/HomeMain.vue";
+import Head from "@/components/head.vue";
 </script>
+<style scoped>
+.home {
+  height: auto;
+}
+.el-header {
+  padding: 0;
+}
+.el-main {
+  padding: 0;
+}
+</style>
