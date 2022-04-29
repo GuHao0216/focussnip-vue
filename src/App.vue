@@ -11,6 +11,8 @@
   color: #2c3e50;
 }
 body{
-  margin: 0
+  margin: 0;
+  min-width:780px;
+  min-height:800px
 }
 </style>

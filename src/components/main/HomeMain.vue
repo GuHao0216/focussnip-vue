@@ -7,6 +7,7 @@
           class="carousel_item"
           alt="图片丢失了"
           :title="item.title"
+          @click="getHomeProducts"
         />
       </el-carousel-item>
     </el-carousel>
@@ -108,17 +109,49 @@
     <el-card class="box-card">
       <template #header>
         <div class="card-header">
-          <span>{{ o.name }}</span>
+          <span style="font: 26px bold">{{ o.name }}</span>
           <el-button class="button" type="text">查看全部</el-button>
         </div>
       </template>
-      <div v-for="o in categoryList" :key="o.name" class="text item">
-        {{ o.name }}
-      </div>
+      <el-row>
+        <el-col
+          v-for="(p, index) in homeProductsList[o.id - 1]"
+          :key="p"
+          :span="6"
+          :offset="index > 0 ? 2 : 1"
+        >
+          <el-card :body-style="{ padding: '0px' }" shadow="hover">
+            <img :src="p.picture" class="carousel_item" />
+            <div
+              style="
+                padding: 14px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+              "
+              :title="p.goodsName"
+            >
+              <span>{{ p.goodsName }}</span>
+              <div>
+                <span>{{ subTime(p.holdTime)}}&nbsp;</span>
+                <span>{{ p.tip }}</span>
+              </div>
+              <div class="bottom" style="font-size: 23px; color: #409eff">
+                <!-- <time class="time">{{ currentDate }}</time> -->
+                ¥{{ p.price }}
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
     </el-card>
   </el-row>
 </template>
+
 <script setup>
+import { onMounted, ref } from "vue";
+import { getProducts } from "@/api/product";
+
 const imgList = [
   {
     name: "lj",
@@ -139,14 +172,41 @@ const imgList = [
 const categoryList = [
   {
     name: "演唱会",
+    id: 1,
   },
   {
     name: "综艺",
+    id: 2,
   },
   {
     name: "音乐剧",
+    id: 3,
   },
 ];
+const homeProductsList = ref([]);
+
+const subTime = (strTime) =>{
+  let index = strTime.indexOf("T")
+  return strTime.substr(0,index)
+}
+
+const getHomeProducts = async () => {
+  const categoryList = [1, 2, 3];
+  for (let index = 0; index < categoryList.length; index++) {
+    const data = {
+      pageNum: 1,
+      pageSize: 3,
+      category: categoryList[index],
+    };
+    const products = await getProducts(data);
+    // console.log(products.records);
+    homeProductsList.value.push(products.records);
+  }
+};
+
+onMounted(async () => {
+  await getHomeProducts();
+});
 </script>
 
 <style scoped>

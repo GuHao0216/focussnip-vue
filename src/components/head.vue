@@ -7,11 +7,9 @@
             <img src="@/assets/logo1.png" class="logo_img" />
           </div>
         </el-col>
-        <el-col :span="14"> </el-col>
-        <el-col :span="5">
+        <el-col :span="5" :offset="14">
           <div
-            class="flex flex-wrap items-center"
-            style="padding: 6% 0; text-align: right"
+            style="padding: 6% 0;float:right "
           >
             <el-dropdown>
               <el-button type="primary" @click="toLogin()">

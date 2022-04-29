@@ -1,5 +1,5 @@
 <template>
-  <div style="height: auto">
+  <div style="height: auto;">
     <el-container>
       <el-header style="padding: 0">
         <el-row class="head_bg">
@@ -69,12 +69,12 @@
               :model="registerForm"
               :rules="registerRules"
             >
-              <el-form-item label="用户名：" prop="registerName">
+              <el-form-item label="用户名称：" prop="registerName">
                 <el-input
                   v-model="registerForm.registerName"
                   class="w-50 m-2"
                   size="large"
-                  placeholder="请输入用户名"
+                  placeholder="请输入用户名称"
                   :prefix-icon="User"
                 />
               </el-form-item>
@@ -237,8 +237,8 @@ const userRegister = async () => {
 }
 .login {
   position: absolute;
-  left: 40%;
-  top: 30%;
+  left: calc(50% - 200px);
+  top: calc(50% - 150px);
   width: 400px;
   height: 300px;
   overflow: auto;
@@ -246,10 +246,10 @@ const userRegister = async () => {
 }
 .register {
   position: absolute;
-  left: 40%;
-  top: 20%;
+  left: calc(50% - 200px);
+  top: calc(50% - 150px);
   width: 400px;
-  height: 450px;
+  height: auto;
   overflow: auto;
   opacity: 0.9;
 }

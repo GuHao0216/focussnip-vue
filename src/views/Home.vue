@@ -30,5 +30,6 @@ import Head from "@/components/head.vue";
 }
 .el-main {
   padding: 0;
+  overflow-x:hidden;
 }
 </style>
