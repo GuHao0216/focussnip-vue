@@ -10,3 +10,4 @@ for (let iconName in ELIcons) {
 	app.component(iconName, ELIcons[iconName])
 }
 app.use(store).use(router).use(ElementPlus).mount('#app')
+

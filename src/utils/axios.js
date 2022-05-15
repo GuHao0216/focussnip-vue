@@ -1,6 +1,7 @@
 import axios from 'axios'
 import store from '../store'
 import {getToken, setToken} from "./util";
+import { ElMessage } from "element-plus";
 
 const handleResponse = ({data, status,headers}) => {
   if (status === 200) {
@@ -9,8 +10,10 @@ const handleResponse = ({data, status,headers}) => {
         return data.data
       }
       case 1: {
-        setToken('')
-        alert(data.base.message)
+        // setToken('')
+        // alert(data.base.message)
+        ElMessage.error(data.base.message);
+        return false
         // changeAuthFlag()
         break
       }

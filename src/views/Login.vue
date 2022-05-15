@@ -1,5 +1,5 @@
 <template>
-  <div style="height: auto;">
+  <div style="height: auto">
     <el-container>
       <el-header style="padding: 0">
         <el-row class="head_bg">
@@ -10,6 +10,7 @@
                   <img
                     src="@/assets/logo1.png"
                     class="logo_img"
+                    @click="router.push({ path: '/' })"
                   />
                 </div>
               </el-col>
@@ -58,7 +59,7 @@
                 href="/forgetpassword"
                 >忘记密码</a
               >
-              <a class="hyperLink" href="/register">免费注册</a>
+              <a class="hyperLink" href="" @click="router.replace('/register')">免费注册</a>
             </div>
           </el-card>
           <el-card class="register" v-if="isRegister">
@@ -121,7 +122,7 @@
             <br />
             <br />
             <div style="text-align: right">
-              <a class="hyperLink" href="/login">已有账号？点我登录</a>
+              <a class="hyperLink" href="" @click="router.replace('/login')">已有账号？点我登录</a>
             </div>
           </el-card>
         </div>
@@ -130,15 +131,44 @@
     </el-container>
   </div>
 </template>
+<!-- <script>
+export default {
+  beforeRouteEnter: (to, from, next) => {
+    //to 到哪里去
+    //form 从哪里来
+    let path = from.path
+    next((vm) => {
+      vm.fromPath = path
+      console.log(vm.fromPath)
+    });
+  },
+};
+</script> -->
+<!-- <script>
+import { defineComponent } from "vue";
 
+export default defineComponent({
+  beforeRouteEnter(to, from, next) {
+    // Do somethings
+    let path = from.path;
+    next((vm) => {
+      // vm.getFromPath(path);
+      console.log(vm)
+    });
+  },
+});
+</script> -->
 <script setup>
 // @ is an alias to /src
 import { reactive, ref, unref, watchEffect } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter, onBeforeRouteUpdate } from "vue-router";
 import { ElMessage } from "element-plus";
 import { Lock, User, Iphone } from "@element-plus/icons-vue";
-import { setToken } from "@/utils/util";
+import { setToken, setUsername } from "@/utils/util";
 import { login, register } from "@/api/user";
+
+const route = useRoute();
+const router = useRouter();
 
 const registerRef = ref();
 const username = ref();
@@ -146,6 +176,7 @@ const password = ref();
 let isLogin = ref(false);
 let isRegister = ref(false);
 let toPath = ref();
+let fromPath = ref();
 const registerForm = reactive({
   registerName: "",
   registerPassword: "",
@@ -176,8 +207,9 @@ const registerRules = reactive({
   ],
 });
 
-const routerChange = (to) => {
-  toPath = to.path;
+const routerChange = (rt) => {
+  // console.log(rt);
+  toPath = rt.path;
   if (toPath == "/login") {
     isLogin.value = true;
     isRegister.value = false;
@@ -187,8 +219,8 @@ const routerChange = (to) => {
     isLogin.value = false;
   }
 };
-const route = useRoute();
-const router = useRouter();
+
+
 watchEffect(() => {
   routerChange(route);
 });
@@ -198,34 +230,43 @@ const userLogin = async () => {
     password: password.value,
   };
   const token = await login(data);
+
   setToken(token);
+  setUsername({ username: data.username });
   ElMessage.success({ message: "登录成功" });
-  router.push({path:"/",params:{username:username.value}});
+  router.back(-1)
 };
 const userRegister = async () => {
   const form = unref(registerRef);
   if (!form) return;
-  await form.validate((valid) => {
+  await form.validate(async (valid) => {
     if (valid) {
       const data = {
         username: registerForm.registerName,
         password: registerForm.registerPassword,
-        phone: registerForm.registerPhone
+        phone: registerForm.registerPhone,
       };
-      console.log(JSON.stringify(data))
-      const token = register(data);
+      const token = await register(data);
+      if(token == false)
+      ElMessage.error("注册失败");
+      else{
       ElMessage.success("注册成功");
+      router.replace('/login')  
+      }
+      
     } else {
       ElMessage.error("注册失败");
       return false;
     }
   });
 };
+
+const getFromPath = (path) => {
+  fromPath = path;
+  console.log(fromPath);
+};
 </script>
 <style scoped>
-.{
-  
-}
 .login-bg {
   background-image: url(../assets/login.jpg);
   background-repeat: no-repeat;
@@ -253,7 +294,8 @@ const userRegister = async () => {
   overflow: auto;
   opacity: 0.9;
 }
-.hyperLink{
+.hyperLink {
   color: #409eff;
+  /* text-decoration:underline; */
 }
 </style>

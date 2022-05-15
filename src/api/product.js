@@ -1,4 +1,5 @@
 import axios from '@/utils/axios-util'
+import Vrouter from "@/router"
 
 export const getProducts = (data) => {
   return axios.request({
@@ -7,4 +8,14 @@ export const getProducts = (data) => {
     method: 'post'
   })
 }
+
+export const openProductDetail = (productId) => {
+  let routeData = Vrouter.resolve({
+    path: "/productdetail",
+    query:{
+      id: productId
+    },
+  });
+  window.open(routeData.href, "_blank");
+};
 

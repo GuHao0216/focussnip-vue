@@ -12,6 +12,7 @@
         </el-col>
       </el-row>
       <el-footer>Footer</el-footer>
+      <el-backtop :right="100" :bottom="100" />
     </el-container>
   </div>
 </template>
@@ -20,6 +21,7 @@
 // @ is an alias to /src
 import HomeMain from "@/components/main/HomeMain.vue";
 import Head from "@/components/head.vue";
+
 </script>
 <style scoped>
 .home {

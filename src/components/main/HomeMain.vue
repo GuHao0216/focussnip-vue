@@ -120,20 +120,19 @@
           :span="6"
           :offset="index > 0 ? 2 : 1"
         >
-          <el-card :body-style="{ padding: '0px' }" shadow="hover">
+          <el-card
+            :body-style="{ padding: '0px' }"
+            shadow="hover"
+            @click="openProductDetail(p.goodsId)"
+          >
             <img :src="p.picture" class="carousel_item" />
             <div
-              style="
-                padding: 14px;
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-              "
+            class="card-text"
               :title="p.goodsName"
             >
               <span>{{ p.goodsName }}</span>
-              <div>
-                <span>{{ subTime(p.holdTime)}}&nbsp;</span>
+              <div class="card-text">
+                <span>{{ subDateTime(p.marketTime) }}&nbsp;</span>
                 <span>{{ p.tip }}</span>
               </div>
               <div class="bottom" style="font-size: 23px; color: #409eff">
@@ -147,10 +146,15 @@
     </el-card>
   </el-row>
 </template>
-
+<script>
+</script>
 <script setup>
 import { onMounted, ref } from "vue";
-import { getProducts } from "@/api/product";
+import { getProducts, openProductDetail } from "@/api/product";
+import { subDateTime } from "@/utils/time";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const imgList = [
   {
@@ -185,16 +189,11 @@ const categoryList = [
 ];
 const homeProductsList = ref([]);
 
-const subTime = (strTime) =>{
-  let index = strTime.indexOf("T")
-  return strTime.substr(0,index)
-}
-
 const getHomeProducts = async () => {
   const categoryList = [1, 2, 3];
   for (let index = 0; index < categoryList.length; index++) {
     const data = {
-      pageNum: 1,
+      pageNum: 4,
       pageSize: 3,
       category: categoryList[index],
     };
@@ -203,6 +202,11 @@ const getHomeProducts = async () => {
     homeProductsList.value.push(products.records);
   }
 };
+
+// defineExpose({
+//   subTime,
+//   getHomeProducts,
+// });
 
 onMounted(async () => {
   await getHomeProducts();
@@ -240,5 +244,11 @@ onMounted(async () => {
 }
 .box-card {
   width: 100%;
+}
+.card-text {
+  padding: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 </style>
