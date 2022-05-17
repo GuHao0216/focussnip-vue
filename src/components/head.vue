@@ -4,7 +4,7 @@
       <el-row>
         <el-col :span="5">
           <div class="logo_img_div">
-            <img src="@/assets/logo1.png" class="logo_img" @click="router.push({ path: '/' });" />
+            <img src="https://focussnip.oss-cn-hangzhou.aliyuncs.com/files/logo1.png" class="logo_img" @click="router.push({ path: '/' });" />
           </div>
         </el-col>
         <el-col :span="5" :offset="14">
@@ -22,7 +22,7 @@
                 <el-dropdown-menu>
                   <el-dropdown-item>个人信息</el-dropdown-item>
                   <el-dropdown-item>账号设置</el-dropdown-item>
-                  <el-dropdown-item>订单管理</el-dropdown-item>
+                  <el-dropdown-item @click="router.push({ path: 'orderList' }); ">订单管理</el-dropdown-item>
                   <el-dropdown-item @click="exitLogin">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
               </template>

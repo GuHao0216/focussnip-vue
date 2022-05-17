@@ -3,6 +3,8 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import ProductDetail from '../views/ProductDetail.vue'
 import OrderConfirm from '../views/OrderConfirm.vue'
+import OrderPay from '../views/OrderPay.vue'
+import OrderList from '../views/OrderList.vue'
 import { getToken } from '@/utils/util'
 import { ElMessage, formItemValidateStates } from "element-plus";
 
@@ -22,7 +24,7 @@ const routes = [
       title:'登录 - focussnip'
     },
     beforeEnter:(to,from,next) =>{
-      if(getToken() != ""){
+      if(getToken() != ''){
         ElMessage.error("请手动退出登录后再前往登录页");
         console.log(from)
         next({path: from.path})
@@ -41,6 +43,14 @@ const routes = [
     }
   },
   {
+    path: '/forgetpassword',
+    name: 'forgetpassword',
+    component: Login,
+    meta:{
+      title:'找回密码 - focussnip'
+    }
+  },
+  {
     path: '/productdetail',
     name: 'productdetail',
     component: ProductDetail
@@ -49,6 +59,16 @@ const routes = [
     path:'/orderConfirm',
     name:'orderConfirm',
     component: OrderConfirm
+  },
+  {
+    path:'/orderPay',
+    name:'orderPay',
+    component: OrderPay
+  },
+  {
+    path:'/orderList',
+    name:'orderList',
+    component: OrderList
   }
   // {
   //   path: '/about',

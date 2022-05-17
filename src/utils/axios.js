@@ -66,7 +66,7 @@ class HttpRequest {
       // console.debug(url, config)
         this.queue[url] = true
         if (url !== this.authUrl) {
-          config.headers[this.tokenHeader] = `Bearer ${getToken()}`
+          config.headers[this.tokenHeader] = `${getToken()}`
         }
         return config
       },

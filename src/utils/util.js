@@ -3,7 +3,7 @@
 // import config from '@/config'
 // import { forEach, hasOneOf, objEqual } from '@/libs/tools'
 // const { title, cookieExpires, useI18n } = config
-
+import Vrouter  from '@/router'
 export const TOKEN_KEY = 'token';
 export const TOKEN_EXPIRE_TIME = 'expireTime';
 export const USERNAME = 'username';
@@ -20,7 +20,7 @@ export const getToken = () => {
   // const token = Cookies.get(TOKEN_KEY)
   const token = window.localStorage.getItem(TOKEN_KEY)
   if (token) return token
-  else return false
+  else return ''
 }
 export const setUsername = ({username}) => {
   window.localStorage.setItem(USERNAME, username);
@@ -30,6 +30,17 @@ export const getUsername = () => {
   if (username) return username
   else return ''
 }
+
+export const openPage = (pathName) => {
+  let routeData = Vrouter.resolve({
+    path: pathName,
+  });
+  window.open(routeData.href, "_blank");
+};
+
+
+
+
 
 export const hasChild = (item) => {
   return item.children && item.children.length !== 0

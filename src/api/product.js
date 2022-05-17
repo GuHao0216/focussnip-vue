@@ -13,9 +13,10 @@ export const openProductDetail = (productId) => {
   let routeData = Vrouter.resolve({
     path: "/productdetail",
     query:{
-      id: productId
+      productId: productId
     },
   });
   window.open(routeData.href, "_blank");
 };
+
 

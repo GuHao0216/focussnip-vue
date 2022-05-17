@@ -159,17 +159,17 @@ const router = useRouter();
 const imgList = [
   {
     name: "lj",
-    src: require("@/assets/1.jpeg"),
+    src: "https://focussnip.oss-cn-hangzhou.aliyuncs.com/files/1.jpeg",
     title: "这是lj.png",
   },
   {
     name: "logo",
-    src: require("@/assets/2.jpeg"),
+    src: "https://focussnip.oss-cn-hangzhou.aliyuncs.com/files/2.jpeg",
     title: "这是logo.png",
   },
   {
     name: "bg",
-    src: require("@/assets/3.jpeg"),
+    src: "https://focussnip.oss-cn-hangzhou.aliyuncs.com/files/3.jpeg",
     title: "这是bg.png",
   },
 ];

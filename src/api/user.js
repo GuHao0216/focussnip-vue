@@ -15,3 +15,11 @@ export const register = (data) => {
     method: 'post'
   })
 }
+
+export const forget = (data) => {
+  return axios.request({
+    url: 'user/password',
+    data,
+    method: 'put'
+  })
+}
