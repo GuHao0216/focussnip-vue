@@ -18,52 +18,19 @@
               </el-breadcrumb>
               <br />
               <el-row style="width: 100%">
-                <el-table :data="products" stripe style="width: 100%">
+                <el-table :data="orders" stripe style="width: 100%">
                   <el-table-column
                     align="center"
                     label="订单号"
-                    prop="order_id"
-                  ></el-table-column>
+                    prop="orderId"
+                  />
                   <el-table-column
                     align="center"
                     label="订单商品信息"
                     width="280"
+                    prop="description"
                   >
-                    <template #default="scope">
-                      <el-card
-                        :key="scope"
-                        :body-style="{ padding: '0px' }"
-                        @click="openProductDetail(scope.row.goodsId)"
-                        shadow="never"
-                      >
-                        <el-row>
-                          <el-col :span="8">
-                            <img
-                              :src="scope.row.picture"
-                              style="width: 100%; height: 100%"
-                              class="carousel_item"
-                            />
-                          </el-col>
-                          <el-col :span="16">
-                            <div class="card-text" :title="scope.row.goodsName">
-                              <span>{{ scope.row.goodsName }}</span>
-                              <div class="card-text">
-                                <span
-                                  >{{
-                                    subDateTime(scope.row.marketTime)
-                                  }}&nbsp;</span
-                                >
-                              </div>
-                              <div>
-                                <span>{{ scope.row.tip }}</span>
-                              </div>
-                            </div>
-                          </el-col>
-                        </el-row>
-                      </el-card>
-                    </template>
                   </el-table-column>
-                  <el-table-column align="center" prop="count" label="数量" />
                   <el-table-column align="center" label="订单金额">
                     <template #default="scope">
                       <!-- <div style="font: bold 18px large"> -->
@@ -75,18 +42,31 @@
                     align="center"
                     prop="status"
                     label="订单状态"
-                  />
+                  >
+                    <template #default="scope">
+                      <span v-if="scope.row.status == 1" style="color: #039e2a"
+                        >已付款</span
+                      >
+                      <span
+                        v-else-if="scope.row.status == 0"
+                        style="color: #db3a36"
+                        >待付款</span
+                      >
+                    </template>
+                  </el-table-column>
                   <el-table-column align="center" label="操作">
                     <template #default="scope">
                       <el-button
                         size="small"
-                        @click="handleEdit(scope.$index, scope.row)"
-                        >Edit</el-button
+                        @click="handlePay(scope.row.orderId, scope.row.price)"
+                        >付款</el-button
                       >
                       <el-button
                         size="small"
                         type="danger"
-                        @click="handleDelete(scope.$index, scope.row)"
+                        @click="
+                          handleDelete(scope.row.orderId)
+                        "
                         >删除订单</el-button
                       >
                     </template>
@@ -103,44 +83,55 @@
 </template>
 
 <script setup>
-import { onMounted, ref, getCurrentInstance, computed } from "vue";
+import { onMounted, ref, getCurrentInstance, computed, inject } from "vue";
 import { subTime, subDateTime, remainTime } from "@/utils/time";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
 import { getProducts, openProductDetail } from "@/api/product";
 import Head from "@/components/head.vue";
+import { getOrder, deleteOrder } from "@/api/order";
 
-const products = [
-  {
-    address: "枣庄",
-    category: 1,
-    createTime: "2022-06-22T09:10:47",
-    description:
-      "艺人：朴树、万能青年旅店、面孔乐队、夏日入侵企画、海龟先生、棱镜乐队、PeaceHotel和平饭店乐队、柳爽",
-    goodsId: "2013",
-    goodsName: "2022青鱼音乐节·枣庄",
-    holdTime: "2022-12-20T09:10:47",
-    marketTime: "2022-07-19T09:10:47",
-    picture:
-      "https://img.alicdn.com/bao/uploaded/https://img.alicdn.com/imgextra/i2/2251059038/O1CN01Ejto0F2GdSNrh3BJZ_!!2251059038.jpg",
-    price: 490,
-    starId: 2,
-    status: 1,
-    stock: 89,
-    tip: "枣庄市民中心体育场",
-    updateTime: "2022-06-22T09:10:47",
-    count: 1,
-    order_id: 1211,
-  },
-];
+const reload = inject("reload");
+const router = useRouter();
+// const products = [
+//   {
+//     orderId: "1",
+//     price: 123.0,
+//     description: "张杰演唱会",
+//     createdTime: "2022-04-09T23:21:37",
+//     payedTime: "2022-04-10T10:55:56",
+//     status: 0,
+//     userId: 34,
+//   },
+// ];
+const orders = ref([]);
+
 let total = ref(0);
 
-const calTotal = (products) => {
-  products.forEach((element) => {
-    total.value += element.price;
+const getOrders = async () => {
+  const orderList = await getOrder();
+  orders.value = orderList.records;
+};
+
+const handlePay = (orderId, price) => {
+  router.push({
+    name: "orderPay",
+    query: { orderId: orderId },
+    params: { total: price },
   });
 };
+
+const handleDelete = async (orderId) => {
+  const data = await deleteOrder(orderId);
+  if (data == undefined) {
+    ElMessage.success("删除订单成功");
+    // getOrders();
+    reload();
+  }
+};
+
 onMounted(() => {
-  calTotal(products);
+  getOrders();
 });
 </script>
 <style scoped>

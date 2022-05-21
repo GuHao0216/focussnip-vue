@@ -13,3 +13,15 @@ export const payOrder = (orderId) => {
     method: 'post'
   })
 }
+export const getOrder = () => {
+  return axios.request({
+    url: `order/selectAll`,
+    method: 'get'
+  })
+}
+export const deleteOrder = (orderId) => {
+  return axios.request({
+    url: `order/deleteByOrderId?orderId=${orderId}`,
+    method: 'delete'
+  })
+}
