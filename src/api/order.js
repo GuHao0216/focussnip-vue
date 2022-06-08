@@ -25,3 +25,15 @@ export const deleteOrder = (orderId) => {
     method: 'delete'
   })
 }
+export const alipay = (orderId) => {
+  return axios.request({
+    url: `alipay/${orderId}`,
+    method: 'post'
+  })
+}
+export const checkAlipayStatus = (orderId) => {
+  return axios.request({
+    url: `alipay/query/${orderId}`,
+    method: 'post'
+  })
+}

@@ -11,7 +11,7 @@
           </el-main>
         </el-col>
       </el-row>
-      <el-footer>Footer</el-footer>
+      <!-- <el-footer>Footer</el-footer> -->
       <el-backtop :right="100" :bottom="100" />
     </el-container>
   </div>
