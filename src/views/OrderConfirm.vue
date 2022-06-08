@@ -86,7 +86,7 @@
           </el-col>
         </el-row></el-main
       >
-      <el-footer style="position: absolute; bottom: 0">Footer</el-footer>
+      <!-- <el-footer style="position: absolute; bottom: 0">Footer</el-footer> -->
     </el-container>
   </div>
 </template>
