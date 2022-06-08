@@ -49,6 +49,12 @@
                     src="https://focussnip.oss-cn-hangzhou.aliyuncs.com/files/alipay.png"
                   />
                 </div>
+                <VueQr
+                  :logoSrc="imageUrl"
+                  :text="payQC"
+                  :size="200"
+                ></VueQr>
+                <!-- <VueQr :logoSrc="imageUrl" :logoMargin="3"  text="https://qr.alipay.com/bax07976rlaawhesaenl003d" :size="200"></VueQr> -->
               </el-col>
             </el-row>
             <br />
@@ -63,7 +69,7 @@
                 type="primary"
                 size="large"
                 @click="pay"
-                >付款</el-button
+                >已完成付款</el-button
               >
             </div>
           </el-col>
@@ -78,27 +84,44 @@ import { onMounted, ref, getCurrentInstance, computed } from "vue";
 import { subTime, subDateTime, remainTime } from "@/utils/time";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
-import { payOrder } from "@/api/order";
+import { payOrder, checkAlipayStatus, alipay } from "@/api/order";
+import VueQr from "vue-qr/src/packages/vue-qr.vue";
 import Head from "@/components/head.vue";
 
 const route = useRoute();
 const router = useRouter();
 
+const imageUrl = require("../../public/alipaylogo.png");
+// const imageUrl= require("../assets/logo.png")
+// const imageUrl= "https://focussnip.oss-cn-hangzhou.aliyuncs.com/files/alipay.png"
+
 const total = ref(0);
 const orderId = ref(0);
-const pay = async() =>{
-  const data = await payOrder(orderId.value)
-  if(data != ''){
-      ElMessage.success("支付成功")
-      router.push({path:'/'})
+const payQC = ref("");
+
+const pay = async () => {
+  const flag = await checkAlipayStatus(orderId.value);
+  console.log(flag)
+  if (flag == "WAIT_BUYER_PAY") {
+    ElMessage.warning("等待用户付款");
+  }
+  if (flag == "TRADE_SUCCESS") {
+    const data = await payOrder(orderId.value);
+    if (data != "") {
+      ElMessage.success("支付成功");
+      router.push({ path: "/" });
+    } else {
+      ElMessage.error("支付失败");
+    }
   }
   else{
-      ElMessage.error("支付失败")
+    ElMessage.warning("未完成付款");
   }
-}
-onMounted(() => {
+};
+onMounted(async () => {
   orderId.value = route.query.orderId;
   total.value = route.params.total;
+  payQC.value = await alipay(orderId.value);
 });
 </script>
 <style scoped>
