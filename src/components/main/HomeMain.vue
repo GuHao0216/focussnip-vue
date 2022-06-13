@@ -115,7 +115,7 @@
       </template>
       <el-row>
         <el-col
-          v-for="(p, index) in homeProductsList[o.id - 1]"
+          v-for="(p, index) in homeProductsList[o.id]"
           :key="p"
           :span="6"
           :offset="index > 0 ? 2 : 1"
@@ -123,13 +123,10 @@
           <el-card
             :body-style="{ padding: '0px' }"
             shadow="hover"
-            @click="openProductDetail(p.goodsId)"
+            @click="openProductDetail(p.goodsId, o.name)"
           >
             <img :src="p.picture" class="carousel_item" />
-            <div
-            class="card-text"
-              :title="p.goodsName"
-            >
+            <div class="card-text" :title="p.goodsName">
               <span>{{ p.goodsName }}</span>
               <div class="card-text">
                 <span>{{ subDateTime(p.marketTime) }}&nbsp;</span>
@@ -151,6 +148,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { getProducts, openProductDetail } from "@/api/product";
+import { getSnapProducts } from "@/api/snap";
 import { subDateTime } from "@/utils/time";
 import { useRouter } from "vue-router";
 
@@ -174,6 +172,10 @@ const imgList = [
   },
 ];
 const categoryList = [
+  {
+    name: "限时秒杀",
+    id: 0,
+  },
   {
     name: "演唱会",
     id: 1,
@@ -202,6 +204,14 @@ const getHomeProducts = async () => {
     homeProductsList.value.push(products.records);
   }
 };
+const getHomeSnapProducts = async () => {
+  const products = await getSnapProducts();
+  products.forEach((element) => {
+    element.goodsId = element.id;
+  });
+  // console.log(products);
+  homeProductsList.value.push(products.slice(0, 3));
+};
 
 // defineExpose({
 //   subTime,
@@ -209,6 +219,7 @@ const getHomeProducts = async () => {
 // });
 
 onMounted(async () => {
+  await getHomeSnapProducts();
   await getHomeProducts();
 });
 </script>

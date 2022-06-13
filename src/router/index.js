@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import ProductDetail from '../views/ProductDetail.vue'
+import SnapProductDetail from '../views/SnapProductDetail.vue'
 import OrderConfirm from '../views/OrderConfirm.vue'
 import OrderPay from '../views/OrderPay.vue'
 import OrderList from '../views/OrderList.vue'
@@ -54,6 +55,11 @@ const routes = [
     path: '/productdetail',
     name: 'productdetail',
     component: ProductDetail
+  },
+  {
+    path: '/snapproductdetail',
+    name: 'snapproductdetail',
+    component: SnapProductDetail
   },
   {
     path:'/orderConfirm',

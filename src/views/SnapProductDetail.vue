@@ -11,12 +11,10 @@
               <el-row style="padding: 2% 0">
                 <el-breadcrumb separator="/">
                   <el-breadcrumb-item :to="{ path: '/' }"
-                    >首页</el-breadcrumb-item
+                    ><a href="/">首页</a></el-breadcrumb-item
                   >
                   <el-breadcrumb-item
-                    ><a href="/"
-                      >{{ categoryList[category - 1] }}
-                    </a></el-breadcrumb-item
+                    ><a href="/">限时秒杀 </a></el-breadcrumb-item
                   >
                   <el-breadcrumb-item>{{
                     product.goodsName
@@ -38,7 +36,8 @@
                       <h3 style="color: red">
                         抢购时间：{{ product.marketTime }}
                       </h3>
-                      <h3>举办时间：{{ product.holdTime }}</h3>
+                      <h3>结束时间：{{ product.endTime }}</h3>
+                      <h4>举办时间：{{ product.holdTime }}</h4>
                       <h4>地点：{{ product.tip }}</h4>
                       <h4>价格：{{ product.price }}</h4>
                       <h5>库存：{{ product.stock }}</h5>
@@ -105,12 +104,24 @@
 
 <script setup>
 // @ is an alias to /src
-import { onMounted, onBeforeUnmount,ref, getCurrentInstance, computed } from "vue";
-import { subTime, subDateTime, remainTime } from "@/utils/time";
+import {
+  onMounted,
+  ref,
+  getCurrentInstance,
+  computed,
+  onBeforeUnmount,
+} from "vue";
+import { subTime, subDateTime, remainTime, remainSnapTime } from "@/utils/time";
 import { useRoute, useRouter } from "vue-router";
 import { getProducts, openProductDetail } from "@/api/product";
+import {
+  getSnapProductDetail,
+  buySnapItem,
+  joinSnap,
+  checkSnap
+} from "@/api/snap";
 import { createOrder } from "@/api/order";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElLoading } from "element-plus";
 import { getToken } from "@/utils/util";
 import Head from "@/components/head.vue";
 
@@ -136,21 +147,29 @@ const router = useRouter();
 //   tip: "枣庄市民中心体育场",
 //   updateTime: "2022-06-22T09:10:47",
 // };
-let timer = null
+let timer = null;
 const activeName = ref("first");
 const product = ref({});
 const category = ref({});
-const categoryList = ["演唱会", "综艺", "音乐剧"];
+const categoryList = ["演唱会", "综艺", "音乐剧", "限时秒杀"];
 const remainMarketTime = ref({});
+const options = {
+  text: "正在全力排队中...",
+};
+const snapId = ref(0);
+const orderId = ref(0);
 
 const buyText = computed(() => {
-  if (product.value.stock != 0) {
-    return "立即抢购";
+  if (getToken() != "") {
+    if (product.value.stock != 0) {
+      return "立即抢购";
+    }
+    return "已售罄";
   }
-  return "已售罄";
+  return "登录后参与抢购";
 });
 const buyType = computed(() => {
-  if (product.value.stock != 0 && remainMarketTime.value == " ") {
+  if (product.value.stock != 0 && remainMarketTime.value != " ") {
     return "primary";
   }
   return "info";
@@ -159,7 +178,7 @@ const homeProductsList = ref([]);
 
 const getRecommendListProducts = async (category) => {
   const data = {
-    pageNum: Math.round(Math.random() * 10),
+    pageNum: Math.round(Math.random() * 3),
     pageSize: 3,
     category: category,
   };
@@ -167,40 +186,66 @@ const getRecommendListProducts = async (category) => {
   homeProductsList.value.push(recommendProducts.records);
 };
 const getProductDetail = async (id) => {
-  const data = {
-    goodsId: id,
-  };
-  const products = await getProducts(data);
-  product.value = products.records[0];
-  product.value.marketTime = subTime(product.value.marketTime);
-  product.value.holdTime = subTime(product.value.holdTime);
+  const products = await getSnapProductDetail(id);
+  product.value = products;
+  //   product.value.marketTime = subTime(product.value.marketTime);
+  //   product.value.holdTime = subTime(product.value.holdTime);
   category.value = product.value.category;
-  remainMarketTime.value = remainTime(product.value.marketTime);
+  remainMarketTime.value = remainSnapTime(product.value.endTime);
+  //   console.log(product);
   //update time
   timer = setInterval(function () {
-    remainMarketTime.value = remainTime(product.value.marketTime);
+    remainMarketTime.value = remainSnapTime(product.value.endTime);
   }, 1000);
 };
 
 const confirmOrder = async (btype, btext) => {
   if (getToken() === "") {
     router.push({ path: "/login" });
-  } else if (product.value.stock != 0 && remainMarketTime.value == " ") {
+  }
+   else if (product.value.stock != 0 && remainMarketTime.value != " ") {
     // const data = {
     //   goodId: product.value.goodsId
     // }
-    const orderId = await createOrder(product.value.goodsId);
-    if (orderId) {
-      //TODO:默认数量为1
-      product.value.count = 1
-      router.push({
-        name: "orderConfirm",
-        query: { orderId: orderId.orderId },
-        params: { product: JSON.stringify(product.value),snap: false },
-      });
+    // 获取抢购资格
+    const loadingInstance = ElLoading.service(options);
+    const joinFlag = await joinSnap();
+    const buyFlag = await buySnapItem(product.value.id);
+    if (joinFlag == "成功参与抢购" && buyFlag == "成功参与抢购") {
+      //   const checkflag = await checkSnap();
+
+      const snapTimer = setInterval(() => {
+        setTimeout(async () => {
+          // chooseProduct 自己封装的axios请求
+          const checkflag = await checkSnap();
+          console.log(checkflag);
+          //视情况而定
+          if (checkflag != false) {
+            // 这里可以写一些中止轮询的条件
+            clearInterval(snapTimer);
+            // snapTimer = null;
+            loadingInstance.close();
+            //TODO:默认数量为1
+            orderId.value = checkflag.id;
+            snapId.value = checkflag.snapId;
+            product.value.count = 1;
+            router.push({
+              name: "orderConfirm",
+              query: { orderId: orderId.value },
+              params: {
+                product: JSON.stringify(product.value),
+                snap: true,
+                snapId: snapId.value,
+              },
+            });
+          }
+        }, 0);
+      }, 2000);
+      //购买特定抢购商品
     } else {
-      ElMessage.error("订单创建失败");
+      ElMessage.error("参与抢购失败,请重试");
     }
+    // console.log(joinFlag);
   }
 };
 
@@ -214,10 +259,13 @@ onMounted(async () => {
     await getRecommendListProducts(category.value);
   }
 });
-onBeforeUnmount(()=>{
-    clearInterval(timer)
-    timer = null
-})
+
+onBeforeUnmount(() => {
+  clearInterval(timer);
+//   clearInterval(snapTimer);
+  timer = null;
+//   snapTimer = null;
+});
 </script>
 <style scoped>
 .home {

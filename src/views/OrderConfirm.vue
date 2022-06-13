@@ -95,35 +95,61 @@ import { onMounted, ref, getCurrentInstance, computed } from "vue";
 import { subTime, subDateTime, remainTime } from "@/utils/time";
 import { useRoute, useRouter } from "vue-router";
 import { getProducts, openProductDetail } from "@/api/product";
+import { confirmSnapOrder } from "@/api/snap";
+import { ElMessage } from "element-plus";
 import Head from "@/components/head.vue";
 
 const route = useRoute();
 const router = useRouter();
 
 const products = ref([]);
-const total = ref(0);
+const total = ref(0.0);
 const orderId = ref(0);
+const snapId = ref(0);
+const snapFlag = ref(false);
 
 const calTotal = (p) => {
   p.forEach((element) => {
-    total.value += element.price;
+    total.value += parseFloat(element.price);
   });
 };
 
-const payOrder = () => {
-  const payTotal = total.value
-  const payOrderId = orderId.value
-  router.push({
-    name: "orderPay",
-    query: { orderId: payOrderId },
-    params: { total: payTotal },
-  });
+const payOrder = async () => {
+  const payTotal = total.value;
+  const payOrderId = orderId.value;
+  if (snapFlag.value == "true") {
+    const confirmFlag = await confirmSnapOrder({
+      snapId: parseInt(snapId.value),
+      orderId: parseInt(payOrderId),
+    });
+    if (confirmFlag == "成功参与抢购") {
+          router.push({
+      name: "orderPay",
+      query: { orderId: payOrderId },
+      params: { total: payTotal,snap:snapFlag.value },
+    });
+    }
+  }
+  else{
+    router.push({
+      name: "orderPay",
+      query: { orderId: payOrderId },
+      params: { total: payTotal,snap:snapFlag.value },
+    });
+  }
 };
 
 onMounted(() => {
   orderId.value = route.query.orderId;
   products.value.push(JSON.parse(route.params.product));
+  snapFlag.value = route.params.snap;
+  if(snapFlag.value == "true"){
+   snapId.value = route.params.snapId; 
+  }
+  
+  console.log("snapFlag " + snapFlag.value);
   calTotal(products.value);
+  ElMessage.success("订单创建成功");
 });
 </script>
 <style scoped>

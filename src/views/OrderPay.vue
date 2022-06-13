@@ -49,11 +49,7 @@
                     src="https://focussnip.oss-cn-hangzhou.aliyuncs.com/files/alipay.png"
                   />
                 </div>
-                <VueQr
-                  :logoSrc="imageUrl"
-                  :text="payQC"
-                  :size="200"
-                ></VueQr>
+                <VueQr :logoSrc="imageUrl" :text="payQC" :size="200"></VueQr>
                 <!-- <VueQr :logoSrc="imageUrl" :logoMargin="3"  text="https://qr.alipay.com/bax07976rlaawhesaenl003d" :size="200"></VueQr> -->
               </el-col>
             </el-row>
@@ -63,13 +59,21 @@
               实付款：
               <span style="color: red">￥{{ total }}</span>
             </div>
-            <div style="width: 100%">
+            <div style="width: 100%;">
               <el-button
-                style="float: right; width: 200px"
+                style="float: right; width: 200px;margin-left: 25px;"
                 type="primary"
                 size="large"
                 @click="pay"
                 >已完成付款</el-button
+              >
+              <el-button
+              v-if="snapFlag == 'true'"
+                style="float: right; width: 200px"
+                type="danger"
+                size="large"
+                @click="cancelSnapOrder()"
+                >取消订单</el-button
               >
             </div>
           </el-col>
@@ -85,6 +89,7 @@ import { subTime, subDateTime, remainTime } from "@/utils/time";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { payOrder, checkAlipayStatus, alipay } from "@/api/order";
+import { confirmSnapOrderPay,snapAlipay,cancelOrder } from "@/api/snap";
 import VueQr from "vue-qr/src/packages/vue-qr.vue";
 import Head from "@/components/head.vue";
 
@@ -98,30 +103,58 @@ const imageUrl = require("../../public/alipaylogo.png");
 const total = ref(0);
 const orderId = ref(0);
 const payQC = ref("");
+const snapFlag = ref(false);
 
 const pay = async () => {
-  const flag = await checkAlipayStatus(orderId.value);
-  console.log(flag)
-  if (flag == "WAIT_BUYER_PAY") {
-    ElMessage.warning("等待用户付款");
-  }
-  if (flag == "TRADE_SUCCESS") {
-    const data = await payOrder(orderId.value);
-    if (data != "") {
+  if (snapFlag.value == false) {
+    const flag = await confirmSnapOrderPay(orderId.value);
+    if (flag == "TRADE_SUCCESS") {
       ElMessage.success("支付成功");
       router.push({ path: "/" });
     } else {
       ElMessage.error("支付失败");
     }
-  }
-  else{
-    ElMessage.warning("未完成付款");
+  } else {
+    const flag = await checkAlipayStatus(orderId.value);
+    console.log(flag);
+    if (flag == "WAIT_BUYER_PAY") {
+      ElMessage.warning("等待用户付款");
+    }
+    if (flag == "TRADE_SUCCESS") {
+      const data = await payOrder(orderId.value);
+      if (data != "") {
+        ElMessage.success("支付成功");
+        router.push({ path: "/" });
+      } else {
+        ElMessage.error("支付失败");
+      }
+    } else {
+      ElMessage.warning("未完成付款");
+    }
   }
 };
+
+const cancelSnapOrder = async()=>{
+  const cancelFlag = await cancelOrder(orderId.value)
+  if (cancelFlag == "取消成功"){
+    ElMessage.success("订单取消成功");
+    router.push({ path: "/" });
+  }
+  else {
+    ElMessage.error("订单取消失败");
+  }
+}
 onMounted(async () => {
   orderId.value = route.query.orderId;
   total.value = route.params.total;
-  payQC.value = await alipay(orderId.value);
+  snapFlag.value = route.params.snap;
+  console.log("sn "+snapFlag.value)
+  if(snapFlag.value == "true"){
+    payQC.value = await snapAlipay(orderId.value);
+  }else{
+      payQC.value = await alipay(orderId.value);
+
+  }
 });
 </script>
 <style scoped>

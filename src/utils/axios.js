@@ -12,7 +12,9 @@ const handleResponse = ({data, status,headers}) => {
       case 1: {
         // setToken('')
         // alert(data.base.message)
-        ElMessage.error(data.base.message);
+        if (data.base.message != "抢购失败"){
+          ElMessage.error(data.base.message);
+        }
         return false
         // changeAuthFlag()
         break
